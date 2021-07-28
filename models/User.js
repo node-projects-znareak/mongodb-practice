@@ -1,9 +1,17 @@
 const { Schema, model } = require("mongoose");
 
 const user = new Schema({
-  name: String,
+  name: {
+    type: String,
+    minLength: 4,
+    maxLength: 50,
+  },
   email: String,
-  password: String,
+  password: {
+    type: String,
+    minLength: 6,
+    maxLength: 20,
+  },
   role: {
     type: String,
     default: "user",
@@ -36,4 +44,18 @@ user.query.users = function () {
   });
 };
 
-module.exports = model("User", user);
+// Virtual setters an getters
+user
+  .virtual("auth")
+  .get(function () {
+    return this.email + ":" + this.password;
+  })
+  .set(function ({ email, password }) {
+    this.email = email;
+    this.password = password;
+  });
+
+module.exports = {
+  User: model("User", user),
+  userSchema: user,
+};

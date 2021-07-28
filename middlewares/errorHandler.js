@@ -31,12 +31,6 @@ function clientErrorHandling(err, req, res, next) {
   next(err);
 }
 
-function errorHandling(err, req, res, next) {
-  const { statusCode, payload } = err.output;
-  res.status(statusCode);
-  res.render("error", payload);
-}
-
 function wrapServerErrors(app) {
   if (typeof app.use !== "function") {
     throw new Error("The `app` param isn't a instace of express ");
@@ -49,7 +43,6 @@ function wrapServerErrors(app) {
   app.use(logErrors);
   app.use(wrapErrors);
   app.use(clientErrorHandling);
-  app.use(errorHandling);
 }
 
 module.exports = wrapServerErrors;
