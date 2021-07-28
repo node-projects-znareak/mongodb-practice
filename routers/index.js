@@ -33,10 +33,19 @@ const subdocumentSchema = new mongoose.Schema({
 });
 const Subdoc = mongoose.model("Subdoc", subdocumentSchema);
 
-app.get("/", (req, res, next) => {
+app.get("/", async (req, res, next) => {
+  const query = Note.find({ "author.role": "administrator" });
+  // just select some fields
+  query.select("title description");
+  // after, execute the query
+  const notes = await query.exec();
+
   const doc = new Subdoc();
   // Now doc.child.age has the default value
-  res.json(doc);
+  res.json({
+    doc,
+    notes,
+  });
 
   // take the first sub-document in the array
   const firstChild = doc.children[0];
@@ -44,7 +53,7 @@ app.get("/", (req, res, next) => {
   console.log(firstChild);
   // remove the specific sub-document in the array of sub-documents
   doc.children.id(firstChild._id).remove();
-  
+
   console.log(doc.children);
 });
 
