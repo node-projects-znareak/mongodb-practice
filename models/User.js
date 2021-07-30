@@ -1,6 +1,6 @@
-const { Schema, model } = require("mongoose");
+import { Schema, model } from "mongoose";
 
-const user = new Schema({
+export const userSchema = new Schema({
   name: {
     type: String,
     minLength: 4,
@@ -12,21 +12,25 @@ const user = new Schema({
     minLength: 6,
     maxLength: 20,
   },
+  age: {
+    type: Number,
+    default: 0,
+  },
   role: {
     type: String,
-    default: "user",
+    default: "userSchema",
   },
 });
 
 // The schemas model may have its own methods
-user.methods.toJson = function () {
+userSchema.methods.toJson = function () {
   return JSON.stringify(this);
 };
 
 // Static method  (without to create a new instance)
-user.statics.getUsers = function (role) {
+userSchema.statics.getuserSchemas = function (role) {
   return new Promise((resolve, reject) => {
-    model("User").find({ role }, (err, data) => {
+    model("userSchema").find({ role }, (err, data) => {
       if (err) return reject(new Error("Ocurrió un error", err));
       resolve(data);
     });
@@ -34,10 +38,10 @@ user.statics.getUsers = function (role) {
 };
 
 // Query helper, useful when you use queries commands
-user.query.users = function () {
+userSchema.query.userSchemas = function () {
   return new Promise((resolve, reject) => {
     // the query command
-    this.where({ role: "user" }).exec((err, data) => {
+    this.where({ role: "userSchema" }).exec((err, data) => {
       if (err) return reject(new Error(err));
       resolve(data);
     });
@@ -45,7 +49,7 @@ user.query.users = function () {
 };
 
 // Virtual setters an getters
-user
+userSchema
   .virtual("auth")
   .get(function () {
     return this.email + ":" + this.password;
@@ -55,7 +59,4 @@ user
     this.password = password;
   });
 
-module.exports = {
-  User: model("User", user),
-  userSchema: user,
-};
+export const User = model("User", userSchema);

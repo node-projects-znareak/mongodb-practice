@@ -1,5 +1,5 @@
-const { Schema, model } = require("mongoose");
-const { userSchema } = require("./User");
+import { Schema, model } from "mongoose";
+import { userSchema } from "./User";
 
 const Note = new Schema({
   title: {
@@ -16,6 +16,7 @@ const Note = new Schema({
   // this is a sub-document (schema structure)
   // [!] this is different to populate method
   author: userSchema,
+  tags: [String],
 });
 
 Note.pre("save", function (next) {
@@ -24,5 +25,5 @@ Note.pre("save", function (next) {
   if (title || desc) return next(new Error("Faltan campos"));
   next();
 });
- 
-module.exports = model("Note", Note);
+
+export default model("Note", Note);

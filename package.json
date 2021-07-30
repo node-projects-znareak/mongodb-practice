@@ -12,9 +12,13 @@
     "morgan": "^1.10.0",
     "nodemon": "^2.0.12"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/core": "^7.14.8",
+    "@babel/node": "^7.14.7",
+    "@babel/preset-env": "^7.14.8"
+  },
   "scripts": {
-    "start": "npx nodemon index"
+    "start": "npx nodemon --exec babel-node index"
   },
   "keywords": [
     "javascript",

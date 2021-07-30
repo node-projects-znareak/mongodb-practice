@@ -1,9 +1,10 @@
-const express = require("express");
+import express from "express";
+import mongoose from "mongoose";
+import Note from "../models/Note";
+import { User } from "../models/User";
+
 const app = express.Router();
-const { User } = require("../models/User");
 const Project = require("../models/Project");
-const Note = require("../models/Note");
-const mongoose = require("mongoose");
 
 const childSchema = new mongoose.Schema({
   name: String,
@@ -31,6 +32,7 @@ const subdocumentSchema = new mongoose.Schema({
     default: () => ({}),
   },
 });
+
 const Subdoc = mongoose.model("Subdoc", subdocumentSchema);
 
 app.get("/", async (req, res, next) => {
@@ -59,11 +61,12 @@ app.get("/", async (req, res, next) => {
 
 app.post("/user", async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, age } = req.body;
     const newUser = new User({
       name,
       email,
       password,
+      age,
     });
     // using a promise
     // await newUser.save();
@@ -80,11 +83,52 @@ app.post("/user", async (req, res, next) => {
   }
 });
 
-app.get("/user", async (req, res, next) => {
+// app.get("/user", async (req, res, next) => {
+//   try {
+//     // Using an static method of user model
+//     const users = await User.getUsers("user");
+//     res.json(users);
+//   } catch (err) {
+//     next(err);
+//   }
+// });
+
+app.get("/user", (req, res, next) => {
   try {
-    // Using an static method of user model
-    const users = await User.getUsers("user");
-    res.json(users);
+    User.find({
+      age: {
+        // age range
+        $gte: 18,
+        $lte: 30,
+      },
+    })
+      // i just want the first 3 users
+      .limit(3)
+      .sort({ name: "desc" })
+      // Select some fields
+      .select("name email age")
+      // Execute the query
+      .exec((err, data) => {
+        if (err) return next(new Error(err));
+        res.json(data);
+      });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get("/user2", (req, res, next) => {
+  try {
+    User.find({})
+      .where("role")
+      .eq("administrator")
+      .limit(3)
+      .sort({ name: "desc" })
+      .select("name email")
+      .exec((err, data) => {
+        if (err) return next(new Error(err));
+        res.json(data);
+      });
   } catch (err) {
     next(err);
   }
@@ -155,11 +199,32 @@ app.post("/note", (req, res, next) => {
   try {
     // the `author` prop must follow the User schema
     const { title, description, author } = req.body;
-    const newNote = new Note({ title, description, author });
+    const newNote = new Note({
+      title,
+      description,
+      author,
+      tags: ["default tag "],
+    });
     newNote.save((err, doc) => {
       if (err) return next(new Error(err));
       res.json(doc);
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/note", (req, res, next) => {
+  try {
+    Note.find({})
+      .where("author.role")
+      .eq("administrator")
+      .select("title description tags")
+      .limit(10)
+      .exec((err, data) => {
+        if (err) return next(new Error(err));
+        res.json(data);
+      });
   } catch (error) {
     next(error);
   }
