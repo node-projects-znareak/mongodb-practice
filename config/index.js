@@ -11,7 +11,7 @@ const OPTIONS = {
 
 Mongoose.connection.on("open", () => {
   message.success("Connect to database in " + MONGODB_URL);
-});
+});    
 
 async function connectDb() {
   try {

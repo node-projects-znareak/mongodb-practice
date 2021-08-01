@@ -2,6 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import Note from "../models/Note";
 import { User } from "../models/User";
+import { error } from "../utils/httpResponses";
+import { validationsSchema } from "../utils/validations/validations";
+import validate from "../utils/validations/validate";
 
 const app = express.Router();
 const Project = require("../models/Project");
@@ -13,6 +16,7 @@ const childSchema = new mongoose.Schema({
     default: 0,
   },
 });
+
 const subdocumentSchema = new mongoose.Schema({
   children: {
     type: [{ type: childSchema, default: () => ({}) }],
@@ -33,6 +37,16 @@ const subdocumentSchema = new mongoose.Schema({
   },
 });
 
+const validationSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    minLength: 3,
+    maxLength: 50,
+    required: [true, "The field `name` is required!"],
+  },
+});
+
+const validationModel = mongoose.model("Validation", validationSchema);
 const Subdoc = mongoose.model("Subdoc", subdocumentSchema);
 
 app.get("/", async (req, res, next) => {
@@ -57,6 +71,19 @@ app.get("/", async (req, res, next) => {
   doc.children.id(firstChild._id).remove();
 
   console.log(doc.children);
+});
+
+app.get("/validations", validate(validationsSchema), (req, res, next) => {
+  try {
+    const { name } = req.body;
+    const doc = new validationModel({ name });
+    doc.save((err, document) => {
+      if (err) return res.json(error(res, err, 400));
+      res.json(document);
+    });
+  } catch (err) {
+    next(err);
+  }
 });
 
 app.post("/user", async (req, res, next) => {
