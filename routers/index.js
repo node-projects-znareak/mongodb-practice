@@ -3,7 +3,10 @@ import mongoose from "mongoose";
 import Note from "../models/Note";
 import { User } from "../models/User";
 import { error } from "../utils/httpResponses";
-import { validationsSchema } from "../utils/validations/validations";
+import {
+  validationsSchema,
+  userSchemaValidation,
+} from "../utils/validations/validations";
 import validate from "../utils/validations/validate";
 
 const app = express.Router();
@@ -44,6 +47,11 @@ const validationSchema = new mongoose.Schema({
     maxLength: 50,
     required: [true, "The field `name` is required!"],
   },
+  email: {
+    type: String,
+    minLength: 3,
+    required: [true, "El correo debe ser obligatorio"],
+  },
 });
 
 const validationModel = mongoose.model("Validation", validationSchema);
@@ -75,8 +83,8 @@ app.get("/", async (req, res, next) => {
 
 app.get("/validations", validate(validationsSchema), (req, res, next) => {
   try {
-    const { name } = req.body;
-    const doc = new validationModel({ name });
+    const { name, email } = req.body;
+    const doc = new validationModel({ name, email });
     doc.save((err, document) => {
       if (err) return res.json(error(res, err, 400));
       res.json(document);
@@ -86,7 +94,7 @@ app.get("/validations", validate(validationsSchema), (req, res, next) => {
   }
 });
 
-app.post("/user", async (req, res, next) => {
+app.post("/user", validate(userSchemaValidation), async (req, res, next) => {
   try {
     const { name, email, password, age } = req.body;
     const newUser = new User({

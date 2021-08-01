@@ -5,12 +5,17 @@ export const userSchema = new Schema({
     type: String,
     minLength: 4,
     maxLength: 50,
+    required: [true, "El nombre es obligatorio"],
   },
-  email: String,
+  email: {
+    type: String,
+    required: [true, "El e-mail es obligatorio"],
+  },
   password: {
     type: String,
     minLength: 6,
     maxLength: 20,
+    required: [true, "La contraseña es obligatorio"],
   },
   age: {
     type: Number,
@@ -18,7 +23,7 @@ export const userSchema = new Schema({
   },
   role: {
     type: String,
-    default: "userSchema",
+    default: "user",
   },
 });
 

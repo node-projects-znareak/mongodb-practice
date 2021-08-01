@@ -5,7 +5,6 @@ import { validationError } from "../httpResponses";
  * @param {Object} schema The Yup schema object
  * @param {*} dataToValidate The data for validate with the `schema`
  */
-
 export default function validate(schema) {
   // return the middleware
   return async (req, res, next) => {
@@ -21,7 +20,6 @@ export default function validate(schema) {
 
       next();
     } catch (err) {
-      console.log(err);
       validationError(res, err);
     }
   };

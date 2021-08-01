@@ -13,4 +13,22 @@ export const validationsSchema = yup.object({
       .required("El correo es obligatorio"),
   }),
 });
-validationsSchema.validate;
+
+export const userSchemaValidation = yup.object({
+  body: yup.object({
+    name: yup
+      .string()
+      .min(3, "Mínimo 3 carácteres")
+      .max(50, "Máximo 3 carácteres")
+      .required("El nombre es obligatorio, debe ser entre 3 y 50 carácteres"),
+    email: yup
+      .string()
+      .email("El correo debe ser válido, ejemplo: example@domain.es")
+      .required("El correo es obligatorio"),
+    password: yup
+      .string()
+      .min(6, "Mínimo 6 carácteres para la contraseña")
+      .max(20, "Máximo 20 carácteres para la contraseña")
+      .required("La contraseña es obligatoria"),
+  }),
+});
