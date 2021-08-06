@@ -1,16 +1,16 @@
 const express = require("express");
 const morgan = require("morgan");
 const app = express();
-const connectDb = require("./config");
-const startServer = require("./config");
-const User = require("./models/User");
+const { startServer, connectDb } = require("./config");
 const routers = require("./routers");
-app.use(morgan("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-connectDb();
+async function init() {
+  await connectDb();
+  app.use(morgan("dev"));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use("/api", routers);
+  startServer(app);
+}
 
-app.use("/api", routers);
-
-startServer(app);
+init();

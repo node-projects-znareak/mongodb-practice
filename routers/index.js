@@ -1,61 +1,18 @@
 import express from "express";
-import mongoose from "mongoose";
 import Note from "../models/Note";
-import { User } from "../models/User";
+import Validation from "../models/Validation";
+import SubDocument from "../models/SubDocument";
+import User from "../models/User";
 import { error } from "../utils/httpResponses";
 import {
   validationsSchema,
   userSchemaValidation,
+  projectSchemaValidation,
 } from "../utils/validations/validations";
 import validate from "../utils/validations/validate";
 
 const app = express.Router();
 const Project = require("../models/Project");
-
-const childSchema = new mongoose.Schema({
-  name: String,
-  age: {
-    type: Number,
-    default: 0,
-  },
-});
-
-const subdocumentSchema = new mongoose.Schema({
-  children: {
-    type: [{ type: childSchema, default: () => ({}) }],
-    default: [
-      { name: "Libardo", age: 20 },
-      { name: "Mariana", age: 21 },
-    ],
-  },
-
-  child: {
-    type: childSchema,
-
-    /*
-      If you use sub-documents and you want keep safe the prop `Subdoc.child`
-      you must to add an default object value
-    */
-    default: () => ({}),
-  },
-});
-
-const validationSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    minLength: 3,
-    maxLength: 50,
-    required: [true, "The field `name` is required!"],
-  },
-  email: {
-    type: String,
-    minLength: 3,
-    required: [true, "El correo debe ser obligatorio"],
-  },
-});
-
-const validationModel = mongoose.model("Validation", validationSchema);
-const Subdoc = mongoose.model("Subdoc", subdocumentSchema);
 
 app.get("/", async (req, res, next) => {
   const query = Note.find({ "author.role": "administrator" });
@@ -64,7 +21,7 @@ app.get("/", async (req, res, next) => {
   // after, execute the query
   const notes = await query.exec();
 
-  const doc = new Subdoc();
+  const doc = new SubDocument();
   // Now doc.child.age has the default value
   res.json({
     doc,
@@ -84,7 +41,7 @@ app.get("/", async (req, res, next) => {
 app.get("/validations", validate(validationsSchema), (req, res, next) => {
   try {
     const { name, email } = req.body;
-    const doc = new validationModel({ name, email });
+    const doc = new Validation({ name, email });
     doc.save((err, document) => {
       if (err) return res.json(error(res, err, 400));
       res.json(document);
@@ -206,19 +163,23 @@ app.get("/user2", async (req, res, next) => {
 });
 
 // Projects api
-app.post("/project", async (req, res, next) => {
-  try {
-    const { title, year, description, people } = req.body;
-    const newProject = new Project({ title, year, description, people });
-    //await newProject.save();
-    newProject.save((err, doc) => {
-      if (err) return next(new Error(err));
-      res.json(doc);
-    });
-  } catch (err) {
-    next(err);
+app.post(
+  "/project",
+  validate(projectSchemaValidation),
+  async (req, res, next) => {
+    try {
+      const { title, year, description, people } = req.body;
+      const newProject = new Project({ title, year, description, people });
+      //await newProject.save();
+      newProject.save((err, doc) => {
+        if (err) return next(new Error(err));
+        res.json(doc);
+      });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 app.get("/project", async (req, res, next) => {
   try {

@@ -1,7 +1,8 @@
 const Mongoose = require("mongoose");
 const message = require("../utils/messages");
 const wrapServerErrors = require("../middlewares/errorHandler");
-const MONGODB_URL = "mongodb://127.0.0.1:27017/mongo_testing";
+const MONGODB_URL =
+  "mongodb+srv://znareak:28001320@cluster0.oegdf.mongodb.net/mongo_testing?retryWrites=true";
 const OPTIONS = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -11,7 +12,7 @@ const OPTIONS = {
 
 Mongoose.connection.on("open", () => {
   message.success("Connect to database in " + MONGODB_URL);
-});    
+});
 
 async function connectDb() {
   try {
@@ -34,11 +35,13 @@ async function startServer(app) {
     const server = app.listen(5000, async () => {
       console.clear();
       message.success(`Server has started in http://localhost:5000/`);
-      await connectDb();
     });
   } catch (err) {
     message.error("Error Ocurred while starting the server", err);
   }
 }
 
-module.exports = startServer;
+module.exports = {
+  connectDb,
+  startServer,
+};

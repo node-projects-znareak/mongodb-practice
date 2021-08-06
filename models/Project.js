@@ -1,36 +1,41 @@
 const { Schema, model } = require("mongoose");
 
-const Project = Schema({
-  title: {
-    type: String,
-    trim: true,
-    required: true,
-  },
-  year: {
-    type: Number,
-    require: true,
-  },
-  description: {
-    type: String,
-    trim: true,
-    default: "Empty",
-  },
-  people: [String],
-  date: {
-    type: Date,
-    default: Date.now(),
-  },
-  summary: {
-    bugs: {
-      type: Number,
-      default: 0,
+const Project = Schema(
+  {
+    title: {
+      type: String,
+      trim: true,
+      required: true,
     },
-    downloads: {
+    year: {
       type: Number,
-      default: 0,
+      require: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: "Empty",
+    },
+    people: [String],
+    date: {
+      type: Date,
+      default: Date.now(),
+    },
+    summary: {
+      bugs: {
+        type: Number,
+        default: 0,
+      },
+      downloads: {
+        type: Number,
+        default: 0,
+      },
     },
   },
-});
+  {
+    timestamps: true,
+  }
+);
 
 Project.methods.toJson = function () {
   delete this.__v;
